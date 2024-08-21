@@ -22,18 +22,18 @@ To compile and run ExamTrack, you need a C compiler. For example, you can use GC
 
 1. **Clone the repository**:
     ```bash
-    git clone https://github.com/your-username/ExamTrack.git
+    git clone https://github.com/azizbelkhouja/ExamTrack.git
     cd ExamTrack
     ```
 
 2. **Compile the program**:
     ```bash
-    gcc -o examtrack examtrack.c
+    gcc -o main main.c
     ```
 
 3. **Run the program**:
     ```bash
-    ./examtrack
+    ./main
     ```
 
 ## Usage
