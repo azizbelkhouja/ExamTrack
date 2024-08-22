@@ -1,5 +1,8 @@
 # ExamTrack - Student Exam Management System
 
+[![Run on Repl.it](https://replit.com/badge/github/azizbelkhouja/ExamTrack)](https://replit.com/github/azizbelkhouja/ExamTrack)
+
+
 ExamTrack is a lightweight C-based console application designed to help students manage and organize their exams. With ExamTrack, students can easily add exam details, track grades, calculate total earned credits, and view their average grade (media degli esami). The system also records the date each exam is added, providing a comprehensive overview of academic progress over time.
 
 ## Features
