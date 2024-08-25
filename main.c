@@ -203,7 +203,31 @@ void getValidString(const char *prompt, char *output, int maxLength) {
     }
 }
 
-int main() {
+void handleCommandLineArguments(int argc, char *argv[]) {
+    if (argc > 1) {
+        if (strcmp(argv[1], "add") == 0 && argc == 5) {
+            char *examName = argv[2];
+            int grade = atoi(argv[3]);
+            int credits = atoi(argv[4]);
+
+            if (grade < 18 || grade > 30 || credits <= 0) {
+                printf("Invalid grade or credits. Grade should be between 18 and 30. Credits should be positive.\n");
+            } else {
+                addExam(examName, grade, credits);
+                saveExamsToFile();
+                printf("Exam added via command-line.\n");
+            }
+        } else if (strcmp(argv[1], "stats") == 0) {
+            printf("Total Credits: %d\n", calculateTotalCredits());
+            printf("Average Grade: %.2f\n", calculateAverageGrade());
+        } else {
+            printf("Unknown command or incorrect arguments. Use 'add <name> <grade> <credits>' to add an exam or 'stats' to view stats.\n");
+        }
+        exit(0);
+    }
+}
+
+int main(int argc, char *argv[]) {
     int choice, sortChoice;
     char examName[50];
     int grade, credits;
@@ -211,7 +235,8 @@ int main() {
     char filterDate[20];
 
     loadExamsFromFile();
-    
+    handleCommandLineArguments(argc, argv);
+
     while (1) {
         printf("\n--- Exam Management System ---\n");
         printf("1. Add a New Exam\n");
@@ -219,16 +244,17 @@ int main() {
         printf("3. Calculate Average Grade\n");
         printf("4. Show All Exams\n");
         printf("5. Sort Exams\n");
-        printf("6. Filter Exams by Grade Range\n");
-        printf("7. Filter Exams by Date\n");
+        printf("6. Filter by Grade Range\n");
+        printf("7. Filter by Date\n");
         printf("8. Save and Exit\n");
-        choice = getValidInt("Choose an option (1-8): ", 1, 8);
-        
+        printf("Enter your choice: ");
+        choice = getValidInt("", 1, 8);
+
         switch (choice) {
             case 1:
                 getValidString("Enter exam name: ", examName, sizeof(examName));
                 grade = getValidInt("Enter grade (18-30): ", 18, 30);
-                credits = getValidInt("Enter credits: ", 1, 100);
+                credits = getValidInt("Enter credits: ", 1, 30);
                 addExam(examName, grade, credits);
                 break;
             case 2:
@@ -241,8 +267,8 @@ int main() {
                 displayExams();
                 break;
             case 5:
-                printf("Sort by: 1. Name 2. Grade 3. Date 4. Credits\n");
-                sortChoice = getValidInt("Enter your choice: ", 1, 4);
+                printf("Sort by:\n1. Name\n2. Grade\n3. Date\n4. Credits\nEnter choice: ");
+                sortChoice = getValidInt("", 1, 4);
                 sortExams(sortChoice);
                 break;
             case 6:
