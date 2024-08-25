@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
-
-#define MAX_EXAMS 100
+#include <stdlib.h>
 
 typedef struct {
     char name[50];
@@ -11,8 +10,9 @@ typedef struct {
     char date[20];
 } Exam;
 
-Exam exams[MAX_EXAMS];
+Exam *exams = NULL;
 int totalExams = 0;
+int allocatedSize = 0;
 
 void getCurrentDate(char *dateStr) {
     time_t t = time(NULL);
@@ -21,15 +21,20 @@ void getCurrentDate(char *dateStr) {
 }
 
 void addExam(char *name, int grade, int credits) {
-    if (totalExams < MAX_EXAMS) {
-        strcpy(exams[totalExams].name, name);
-        exams[totalExams].grade = grade;
-        exams[totalExams].credits = credits;
-        getCurrentDate(exams[totalExams].date);
-        totalExams++;
-    } else {
-        printf("Cannot add more exams, maximum limit reached.\n");
+    if (totalExams == allocatedSize) {
+        allocatedSize += 10;
+        exams = realloc(exams, allocatedSize * sizeof(Exam));
+        if (exams == NULL) {
+            printf("Memory allocation failed!\n");
+            exit(1);
+        }
     }
+
+    strcpy(exams[totalExams].name, name);
+    exams[totalExams].grade = grade;
+    exams[totalExams].credits = credits;
+    getCurrentDate(exams[totalExams].date);
+    totalExams++;
 }
 
 int calculateTotalCredits() {
@@ -77,23 +82,19 @@ int main() {
         
         switch (choice) {
             case 1:
-                if (totalExams >= MAX_EXAMS) {
-                    printf("Max exams reached. Cannot add more.\n");
-                } else {
-                    printf("Enter exam name: ");
-                    scanf("%s", examName);
-                    do {
-                        printf("Enter grade (18-30): ");
-                        scanf("%d", &grade);
-                        if (grade < 18 || grade > 30) {
-                            printf("Invalid grade, please enter a value between 18 and 30.\n");
-                        }
-                    } while (grade < 18 || grade > 30);
+                printf("Enter exam name: ");
+                scanf("%s", examName);
+                do {
+                    printf("Enter grade (18-30): ");
+                    scanf("%d", &grade);
+                    if (grade < 18 || grade > 30) {
+                        printf("Invalid grade, please enter a value between 18 and 30.\n");
+                    }
+                } while (grade < 18 || grade > 30);
 
-                    printf("Enter credits: ");
-                    scanf("%d", &credits);
-                    addExam(examName, grade, credits);
-                }
+                printf("Enter credits: ");
+                scanf("%d", &credits);
+                addExam(examName, grade, credits);
                 break;
             case 2:
                 printf("Total Credits: %d\n", calculateTotalCredits());
@@ -105,6 +106,8 @@ int main() {
                 displayExams();
                 break;
             case 5:
+                // Free the allocated memory before exiting
+                free(exams);
                 printf("Exiting...\n");
                 return 0;
             default:
