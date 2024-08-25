@@ -26,7 +26,7 @@ void addExam(char *name, int grade, int credits) {
         allocatedSize += 10;
         exams = realloc(exams, allocatedSize * sizeof(Exam));
         if (exams == NULL) {
-            printf("Memory allocation failed!\n");
+            printf("Memory allocation failed. Exiting program.\n");
             exit(1);
         }
     }
@@ -69,7 +69,7 @@ void displayExams() {
 void saveExamsToFile() {
     FILE *file = fopen(filename, "w");
     if (file == NULL) {
-        printf("Error opening file for writing.\n");
+        printf("Error: Unable to open file for writing.\n");
         return;
     }
 
@@ -78,13 +78,13 @@ void saveExamsToFile() {
     }
 
     fclose(file);
-    printf("Exams saved to %s.\n", filename);
+    printf("Exams have been successfully saved to '%s'.\n", filename);
 }
 
 void loadExamsFromFile() {
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
-        printf("No previous exam data found.\n");
+        printf("No saved exams found. Starting fresh.\n");
         return;
     }
 
@@ -97,7 +97,7 @@ void loadExamsFromFile() {
             allocatedSize += 10;
             exams = realloc(exams, allocatedSize * sizeof(Exam));
             if (exams == NULL) {
-                printf("Memory allocation failed!\n");
+                printf("Memory allocation failed. Exiting program.\n");
                 fclose(file);
                 exit(1);
             }
@@ -110,10 +110,9 @@ void loadExamsFromFile() {
     }
 
     fclose(file);
-    printf("Exams loaded from %s.\n", filename);
+    printf("Exams have been successfully loaded from '%s'.\n", filename);
 }
 
-// Sorting comparison functions
 int compareByName(const void *a, const void *b) {
     return strcmp(((Exam*)a)->name, ((Exam*)b)->name);
 }
@@ -145,10 +144,10 @@ void sortExams(int choice) {
             qsort(exams, totalExams, sizeof(Exam), compareByCredits);
             break;
         default:
-            printf("Invalid choice for sorting.\n");
+            printf("Invalid sorting option. Please try again.\n");
             return;
     }
-    displayExams()
+    displayExams();
 }
 
 void filterByGradeRange(int minGrade, int maxGrade) {
@@ -171,6 +170,39 @@ void filterByDate(char *date) {
     }
 }
 
+int getValidInt(const char *prompt, int min, int max) {
+    int value;
+    char input[50];
+    while (1) {
+        printf("%s", prompt);
+        if (fgets(input, sizeof(input), stdin) == NULL) {
+            printf("Error reading input. Please try again.\n");
+            continue;
+        }
+        if (sscanf(input, "%d", &value) == 1 && value >= min && value <= max) {
+            return value;
+        }
+        printf("Invalid input. Please enter a number between %d and %d.\n", min, max);
+    }
+}
+
+void getValidString(const char *prompt, char *output, int maxLength) {
+    char input[100];
+    while (1) {
+        printf("%s", prompt);
+        if (fgets(input, sizeof(input), stdin) == NULL) {
+            printf("Error reading input. Please try again.\n");
+            continue;
+        }
+        input[strcspn(input, "\n")] = 0;
+        if (strlen(input) > 0 && strlen(input) < maxLength) {
+            strcpy(output, input);
+            return;
+        }
+        printf("Invalid input. Please enter a non-empty string shorter than %d characters.\n", maxLength);
+    }
+}
+
 int main() {
     int choice, sortChoice;
     char examName[50];
@@ -181,59 +213,49 @@ int main() {
     loadExamsFromFile();
     
     while (1) {
-        printf("\nMenu:\n");
-        printf("1. Add Exam\n");
+        printf("\n--- Exam Management System ---\n");
+        printf("1. Add a New Exam\n");
         printf("2. View Total Credits\n");
-        printf("3. Calculate Average Grade (Media degli esami)\n");
+        printf("3. Calculate Average Grade\n");
         printf("4. Show All Exams\n");
         printf("5. Sort Exams\n");
         printf("6. Filter Exams by Grade Range\n");
         printf("7. Filter Exams by Date\n");
-        printf("8. Save Exams and Exit\n");
-        printf("Enter your choice: ");
-        scanf("%d", &choice);
+        printf("8. Save and Exit\n");
+        choice = getValidInt("Choose an option (1-8): ", 1, 8);
         
         switch (choice) {
             case 1:
-                printf("Enter exam name: ");
-                scanf("%s", examName);
-                do {
-                    printf("Enter grade (18-30): ");
-                    scanf("%d", &grade);
-                    if (grade < 18 || grade > 30) {
-                        printf("Invalid grade, please enter a value between 18 and 30.\n");
-                    }
-                } while (grade < 18 || grade > 30);
-
-                printf("Enter credits: ");
-                scanf("%d", &credits);
+                getValidString("Enter exam name: ", examName, sizeof(examName));
+                grade = getValidInt("Enter grade (18-30): ", 18, 30);
+                credits = getValidInt("Enter credits: ", 1, 100);
                 addExam(examName, grade, credits);
                 break;
             case 2:
                 printf("Total Credits: %d\n", calculateTotalCredits());
                 break;
             case 3:
-                printf("Average Grade (Media degli esami): %.2f\n", calculateAverageGrade());
+                printf("Average Grade: %.2f\n", calculateAverageGrade());
                 break;
             case 4:
                 displayExams();
                 break;
             case 5:
                 printf("Sort by: 1. Name 2. Grade 3. Date 4. Credits\n");
-                printf("Enter your choice: ");
-                scanf("%d", &sortChoice);
+                sortChoice = getValidInt("Enter your choice: ", 1, 4);
                 sortExams(sortChoice);
                 break;
             case 6:
-                printf("Enter minimum grade: ");
-                scanf("%d", &minGrade);
-                printf("Enter maximum grade: ");
-                scanf("%d", &maxGrade);
-                filterByGradeRange(minGrade, maxGrade);
+                minGrade = getValidInt("Enter minimum grade: ", 18, 30);
+                maxGrade = getValidInt("Enter maximum grade: ", 18, 30);
+                if (minGrade > maxGrade) {
+                    printf("Minimum grade cannot be higher than maximum grade. Please try again.\n");
+                } else {
+                    filterByGradeRange(minGrade, maxGrade);
+                }
                 break;
             case 7:
-                printf("Enter date (dd-mm-yyyy): ");
-                scanf("%s", filterDate);
+                getValidString("Enter date (dd-mm-yyyy): ", filterDate, sizeof(filterDate));
                 filterByDate(filterDate);
                 break;
             case 8:
@@ -241,8 +263,6 @@ int main() {
                 free(exams);
                 printf("Exiting...\n");
                 return 0;
-            default:
-                printf("Invalid choice, please try again.\n");
         }
     }
 }
