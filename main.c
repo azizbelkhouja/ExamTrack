@@ -15,6 +15,102 @@ int totalExams = 0;
 int allocatedSize = 0;
 const char *filename = "exams.txt";
 
+// Language strings
+typedef struct {
+    const char *menuTitle;
+    const char *addExamOption;
+    const char *viewCreditsOption;
+    const char *calculateAverageOption;
+    const char *showExamsOption;
+    const char *sortOption;
+    const char *filterGradeOption;
+    const char *filterDateOption;
+    const char *saveExitOption;
+    const char *enterChoicePrompt;
+    const char *examNamePrompt;
+    const char *examGradePrompt;
+    const char *examCreditsPrompt;
+    const char *invalidGradeMessage;
+    const char *totalCreditsMessage;
+    const char *averageGradeMessage;
+    const char *sortByPrompt;
+    const char *sortByName;
+    const char *sortByGrade;
+    const char *sortByDate;
+    const char *sortByCredits;
+    const char *minGradePrompt;
+    const char *maxGradePrompt;
+    const char *filterByDatePrompt;
+    const char *examsLoadedMessage;
+    const char *examsSavedMessage;
+    const char *memoryAllocationErrorMessage;
+    const char *exitingMessage;
+} LanguageStrings;
+
+LanguageStrings english = {
+    "Exam Management System",
+    "1. Add a New Exam",
+    "2. View Total Credits",
+    "3. Calculate Average Grade",
+    "4. Show All Exams",
+    "5. Sort Exams",
+    "6. Filter by Grade Range",
+    "7. Filter by Date",
+    "8. Save and Exit",
+    "Enter your choice: ",
+    "Enter exam name: ",
+    "Enter grade (18-30): ",
+    "Enter credits: ",
+    "Invalid grade, please enter a value between 18 and 30.",
+    "Total Credits: %d\n",
+    "Average Grade: %.2f\n",
+    "Sort by:\n1. Name\n2. Grade\n3. Date\n4. Credits\nEnter choice: ",
+    "Name",
+    "Grade",
+    "Date",
+    "Credits",
+    "Enter minimum grade: ",
+    "Enter maximum grade: ",
+    "Enter date (dd-mm-yyyy): ",
+    "Exams have been successfully loaded from '%s'.\n",
+    "Exams have been successfully saved to '%s'.\n",
+    "Memory allocation failed. Exiting program.\n",
+    "Exiting...\n"
+};
+
+LanguageStrings italian = {
+    "Sistema di Gestione degli Esami",
+    "1. Aggiungi un Nuovo Esame",
+    "2. Visualizza Crediti Totali",
+    "3. Calcola la Media dei Voti",
+    "4. Mostra Tutti gli Esami",
+    "5. Ordina gli Esami",
+    "6. Filtra per Intervallo di Voti",
+    "7. Filtra per Data",
+    "8. Salva e Esci",
+    "Inserisci la tua scelta: ",
+    "Inserisci il nome dell'esame: ",
+    "Inserisci il voto (18-30): ",
+    "Inserisci i crediti: ",
+    "Voto non valido, inserisci un valore tra 18 e 30.",
+    "Crediti Totali: %d\n",
+    "Media dei Voti: %.2f\n",
+    "Ordina per:\n1. Nome\n2. Voto\n3. Data\n4. Crediti\nInserisci la scelta: ",
+    "Nome",
+    "Voto",
+    "Data",
+    "Crediti",
+    "Inserisci il voto minimo: ",
+    "Inserisci il voto massimo: ",
+    "Inserisci la data (gg-mm-aaaa): ",
+    "Esami caricati con successo da '%s'.\n",
+    "Esami salvati con successo in '%s'.\n",
+    "Allocazione della memoria fallita. Uscita dal programma.\n",
+    "Uscita...\n"
+};
+
+LanguageStrings *lang;
+
 void getCurrentDate(char *dateStr) {
     time_t t = time(NULL);
     struct tm tm = *localtime(&t);
@@ -26,7 +122,7 @@ void addExam(char *name, int grade, int credits) {
         allocatedSize += 10;
         exams = realloc(exams, allocatedSize * sizeof(Exam));
         if (exams == NULL) {
-            printf("Memory allocation failed. Exiting program.\n");
+            printf("%s", lang->memoryAllocationErrorMessage);
             exit(1);
         }
     }
@@ -59,7 +155,7 @@ float calculateAverageGrade() {
 }
 
 void displayExams() {
-    printf("List of Exams:\n");
+    printf("%s\n", lang->menuTitle);
     for (int i = 0; i < totalExams; i++) {
         printf("%d. %s - Grade: %d, Credits: %d, Date: %s\n", 
                i + 1, exams[i].name, exams[i].grade, exams[i].credits, exams[i].date);
@@ -78,7 +174,7 @@ void saveExamsToFile() {
     }
 
     fclose(file);
-    printf("Exams have been successfully saved to '%s'.\n", filename);
+    printf(lang->examsSavedMessage, filename);
 }
 
 void loadExamsFromFile() {
@@ -97,7 +193,7 @@ void loadExamsFromFile() {
             allocatedSize += 10;
             exams = realloc(exams, allocatedSize * sizeof(Exam));
             if (exams == NULL) {
-                printf("Memory allocation failed. Exiting program.\n");
+                printf("%s", lang->memoryAllocationErrorMessage);
                 fclose(file);
                 exit(1);
             }
@@ -110,7 +206,7 @@ void loadExamsFromFile() {
     }
 
     fclose(file);
-    printf("Exams have been successfully loaded from '%s'.\n", filename);
+    printf(lang->examsLoadedMessage, filename);
 }
 
 int compareByName(const void *a, const void *b) {
@@ -144,14 +240,14 @@ void sortExams(int choice) {
             qsort(exams, totalExams, sizeof(Exam), compareByCredits);
             break;
         default:
-            printf("Invalid sorting option. Please try again.\n");
+            printf("%s", lang->invalidGradeMessage);
             return;
     }
     displayExams();
 }
 
 void filterByGradeRange(int minGrade, int maxGrade) {
-    printf("Exams with grades between %d and %d:\n", minGrade, maxGrade);
+    printf(lang->menuTitle, minGrade, maxGrade);
     for (int i = 0; i < totalExams; i++) {
         if (exams[i].grade >= minGrade && exams[i].grade <= maxGrade) {
             printf("%d. %s - Grade: %d, Credits: %d, Date: %s\n", 
@@ -161,7 +257,7 @@ void filterByGradeRange(int minGrade, int maxGrade) {
 }
 
 void filterByDate(char *date) {
-    printf("Exams on %s:\n", date);
+    printf(lang->menuTitle, date);
     for (int i = 0; i < totalExams; i++) {
         if (strcmp(exams[i].date, date) == 0) {
             printf("%d. %s - Grade: %d, Credits: %d, Date: %s\n", 
@@ -170,110 +266,64 @@ void filterByDate(char *date) {
     }
 }
 
-int getValidInt(const char *prompt, int min, int max) {
-    int value;
-    char input[50];
-    while (1) {
-        printf("%s", prompt);
-        if (fgets(input, sizeof(input), stdin) == NULL) {
-            printf("Error reading input. Please try again.\n");
-            continue;
-        }
-        if (sscanf(input, "%d", &value) == 1 && value >= min && value <= max) {
-            return value;
-        }
-        printf("Invalid input. Please enter a number between %d and %d.\n", min, max);
-    }
-}
-
-void getValidString(const char *prompt, char *output, int maxLength) {
-    char input[100];
-    while (1) {
-        printf("%s", prompt);
-        if (fgets(input, sizeof(input), stdin) == NULL) {
-            printf("Error reading input. Please try again.\n");
-            continue;
-        }
-        input[strcspn(input, "\n")] = 0;
-        if (strlen(input) > 0 && strlen(input) < maxLength) {
-            strcpy(output, input);
-            return;
-        }
-        printf("Invalid input. Please enter a non-empty string shorter than %d characters.\n", maxLength);
-    }
-}
-
-void handleCommandLineArguments(int argc, char *argv[]) {
-    if (argc > 1) {
-        if (strcmp(argv[1], "add") == 0 && argc == 5) {
-            char *examName = argv[2];
-            int grade = atoi(argv[3]);
-            int credits = atoi(argv[4]);
-
-            if (grade < 18 || grade > 30 || credits <= 0) {
-                printf("Invalid grade or credits. Grade should be between 18 and 30. Credits should be positive.\n");
-            } else {
-                addExam(examName, grade, credits);
-                saveExamsToFile();
-                printf("Exam added via command-line.\n");
-            }
-        } else if (strcmp(argv[1], "stats") == 0) {
-            printf("Total Credits: %d\n", calculateTotalCredits());
-            printf("Average Grade: %.2f\n", calculateAverageGrade());
-        } else {
-            printf("Unknown command or incorrect arguments. Use 'add <name> <grade> <credits>' to add an exam or 'stats' to view stats.\n");
-        }
-        exit(0);
-    }
-}
-
 int main(int argc, char *argv[]) {
-    int choice, sortChoice;
-    char examName[50];
-    int grade, credits;
-    int minGrade, maxGrade;
-    char filterDate[20];
+    int choice, grade, credits, sortChoice, minGrade, maxGrade;
+    char examName[50], filterDate[20], languageChoice[10];
+
+    // Language selection
+    printf("Select language (en/it): ");
+    scanf("%s", languageChoice);
+    lang = (strcmp(languageChoice, "it") == 0) ? &italian : &english;
 
     loadExamsFromFile();
-    handleCommandLineArguments(argc, argv);
 
     while (1) {
-        printf("\n--- Exam Management System ---\n");
-        printf("1. Add a New Exam\n");
-        printf("2. View Total Credits\n");
-        printf("3. Calculate Average Grade\n");
-        printf("4. Show All Exams\n");
-        printf("5. Sort Exams\n");
-        printf("6. Filter by Grade Range\n");
-        printf("7. Filter by Date\n");
-        printf("8. Save and Exit\n");
-        printf("Enter your choice: ");
-        choice = getValidInt("", 1, 8);
+        printf("\n%s\n", lang->menuTitle);
+        printf("%s\n", lang->addExamOption);
+        printf("%s\n", lang->viewCreditsOption);
+        printf("%s\n", lang->calculateAverageOption);
+        printf("%s\n", lang->showExamsOption);
+        printf("%s\n", lang->sortOption);
+        printf("%s\n", lang->filterGradeOption);
+        printf("%s\n", lang->filterDateOption);
+        printf("%s\n", lang->saveExitOption);
+        printf("%s", lang->enterChoicePrompt);
+        scanf("%d", &choice);
 
         switch (choice) {
             case 1:
-                getValidString("Enter exam name: ", examName, sizeof(examName));
-                grade = getValidInt("Enter grade (18-30): ", 18, 30);
-                credits = getValidInt("Enter credits: ", 1, 30);
+                printf("%s", lang->examNamePrompt);
+                scanf("%s", examName);
+                printf("%s", lang->examGradePrompt);
+                scanf("%d", &grade);
+                while (grade < 18 || grade > 30) {
+                    printf("%s", lang->invalidGradeMessage);
+                    printf("%s", lang->examGradePrompt);
+                    scanf("%d", &grade);
+                }
+                printf("%s", lang->examCreditsPrompt);
+                scanf("%d", &credits);
                 addExam(examName, grade, credits);
                 break;
             case 2:
-                printf("Total Credits: %d\n", calculateTotalCredits());
+                printf(lang->totalCreditsMessage, calculateTotalCredits());
                 break;
             case 3:
-                printf("Average Grade: %.2f\n", calculateAverageGrade());
+                printf(lang->averageGradeMessage, calculateAverageGrade());
                 break;
             case 4:
                 displayExams();
                 break;
             case 5:
-                printf("Sort by:\n1. Name\n2. Grade\n3. Date\n4. Credits\nEnter choice: ");
-                sortChoice = getValidInt("", 1, 4);
+                printf("%s", lang->sortByPrompt);
+                scanf("%d", &sortChoice);
                 sortExams(sortChoice);
                 break;
             case 6:
-                minGrade = getValidInt("Enter minimum grade: ", 18, 30);
-                maxGrade = getValidInt("Enter maximum grade: ", 18, 30);
+                printf("%s", lang->minGradePrompt);
+                scanf("%d", &minGrade);
+                printf("%s", lang->maxGradePrompt);
+                scanf("%d", &maxGrade);
                 if (minGrade > maxGrade) {
                     printf("Minimum grade cannot be higher than maximum grade. Please try again.\n");
                 } else {
@@ -281,13 +331,14 @@ int main(int argc, char *argv[]) {
                 }
                 break;
             case 7:
-                getValidString("Enter date (dd-mm-yyyy): ", filterDate, sizeof(filterDate));
+                printf("%s", lang->filterByDatePrompt);
+                scanf("%s", filterDate);
                 filterByDate(filterDate);
                 break;
             case 8:
                 saveExamsToFile();
                 free(exams);
-                printf("Exiting...\n");
+                printf("%s", lang->exitingMessage);
                 return 0;
         }
     }
