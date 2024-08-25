@@ -13,6 +13,7 @@ typedef struct {
 Exam *exams = NULL;
 int totalExams = 0;
 int allocatedSize = 0;
+const char *filename = "exams.txt";
 
 void getCurrentDate(char *dateStr) {
     time_t t = time(NULL);
@@ -65,10 +66,59 @@ void displayExams() {
     }
 }
 
+void saveExamsToFile() {
+    FILE *file = fopen(filename, "w");
+    if (file == NULL) {
+        printf("Error opening file for writing.\n");
+        return;
+    }
+
+    for (int i = 0; i < totalExams; i++) {
+        fprintf(file, "%s %d %d %s\n", exams[i].name, exams[i].grade, exams[i].credits, exams[i].date);
+    }
+
+    fclose(file);
+    printf("Exams saved to %s.\n", filename);
+}
+
+void loadExamsFromFile() {
+    FILE *file = fopen(filename, "r");
+    if (file == NULL) {
+        printf("No previous exam data found.\n");
+        return;
+    }
+
+    char name[50];
+    int grade, credits;
+    char date[20];
+
+    while (fscanf(file, "%s %d %d %s", name, &grade, &credits, date) == 4) {
+        if (totalExams == allocatedSize) {
+            allocatedSize += 10;
+            exams = realloc(exams, allocatedSize * sizeof(Exam));
+            if (exams == NULL) {
+                printf("Memory allocation failed!\n");
+                fclose(file);
+                exit(1);
+            }
+        }
+        strcpy(exams[totalExams].name, name);
+        exams[totalExams].grade = grade;
+        exams[totalExams].credits = credits;
+        strcpy(exams[totalExams].date, date);
+        totalExams++;
+    }
+
+    fclose(file);
+    printf("Exams loaded from %s.\n", filename);
+}
+
 int main() {
     int choice;
     char examName[50];
     int grade, credits;
+
+    loadExamsFromFile();
     
     while (1) {
         printf("\nMenu:\n");
@@ -76,7 +126,7 @@ int main() {
         printf("2. View Total Credits\n");
         printf("3. Calculate Average Grade (Media degli esami)\n");
         printf("4. Show All Exams\n");
-        printf("5. Exit\n");
+        printf("5. Save Exams and Exit\n");
         printf("Enter your choice: ");
         scanf("%d", &choice);
         
@@ -106,7 +156,7 @@ int main() {
                 displayExams();
                 break;
             case 5:
-                // Free the allocated memory before exiting
+                saveExamsToFile();
                 free(exams);
                 printf("Exiting...\n");
                 return 0;
