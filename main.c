@@ -113,10 +113,70 @@ void loadExamsFromFile() {
     printf("Exams loaded from %s.\n", filename);
 }
 
+// Sorting comparison functions
+int compareByName(const void *a, const void *b) {
+    return strcmp(((Exam*)a)->name, ((Exam*)b)->name);
+}
+
+int compareByGrade(const void *a, const void *b) {
+    return ((Exam*)b)->grade - ((Exam*)a)->grade;
+}
+
+int compareByDate(const void *a, const void *b) {
+    return strcmp(((Exam*)a)->date, ((Exam*)b)->date);
+}
+
+int compareByCredits(const void *a, const void *b) {
+    return ((Exam*)b)->credits - ((Exam*)a)->credits;
+}
+
+void sortExams(int choice) {
+    switch (choice) {
+        case 1:
+            qsort(exams, totalExams, sizeof(Exam), compareByName);
+            break;
+        case 2:
+            qsort(exams, totalExams, sizeof(Exam), compareByGrade);
+            break;
+        case 3:
+            qsort(exams, totalExams, sizeof(Exam), compareByDate);
+            break;
+        case 4:
+            qsort(exams, totalExams, sizeof(Exam), compareByCredits);
+            break;
+        default:
+            printf("Invalid choice for sorting.\n");
+            return;
+    }
+    displayExams()
+}
+
+void filterByGradeRange(int minGrade, int maxGrade) {
+    printf("Exams with grades between %d and %d:\n", minGrade, maxGrade);
+    for (int i = 0; i < totalExams; i++) {
+        if (exams[i].grade >= minGrade && exams[i].grade <= maxGrade) {
+            printf("%d. %s - Grade: %d, Credits: %d, Date: %s\n", 
+                   i + 1, exams[i].name, exams[i].grade, exams[i].credits, exams[i].date);
+        }
+    }
+}
+
+void filterByDate(char *date) {
+    printf("Exams on %s:\n", date);
+    for (int i = 0; i < totalExams; i++) {
+        if (strcmp(exams[i].date, date) == 0) {
+            printf("%d. %s - Grade: %d, Credits: %d, Date: %s\n", 
+                   i + 1, exams[i].name, exams[i].grade, exams[i].credits, exams[i].date);
+        }
+    }
+}
+
 int main() {
-    int choice;
+    int choice, sortChoice;
     char examName[50];
     int grade, credits;
+    int minGrade, maxGrade;
+    char filterDate[20];
 
     loadExamsFromFile();
     
@@ -126,7 +186,10 @@ int main() {
         printf("2. View Total Credits\n");
         printf("3. Calculate Average Grade (Media degli esami)\n");
         printf("4. Show All Exams\n");
-        printf("5. Save Exams and Exit\n");
+        printf("5. Sort Exams\n");
+        printf("6. Filter Exams by Grade Range\n");
+        printf("7. Filter Exams by Date\n");
+        printf("8. Save Exams and Exit\n");
         printf("Enter your choice: ");
         scanf("%d", &choice);
         
@@ -156,6 +219,24 @@ int main() {
                 displayExams();
                 break;
             case 5:
+                printf("Sort by: 1. Name 2. Grade 3. Date 4. Credits\n");
+                printf("Enter your choice: ");
+                scanf("%d", &sortChoice);
+                sortExams(sortChoice);
+                break;
+            case 6:
+                printf("Enter minimum grade: ");
+                scanf("%d", &minGrade);
+                printf("Enter maximum grade: ");
+                scanf("%d", &maxGrade);
+                filterByGradeRange(minGrade, maxGrade);
+                break;
+            case 7:
+                printf("Enter date (dd-mm-yyyy): ");
+                scanf("%s", filterDate);
+                filterByDate(filterDate);
+                break;
+            case 8:
                 saveExamsToFile();
                 free(exams);
                 printf("Exiting...\n");
