@@ -4,7 +4,7 @@
 
 ## Overview
 
-The **Exam Management System** is a simple C program designed to help students manage their exam records. It allows users to add new exams, view total credits, calculate the average grade, sort exams, and filter them by grade or date. The system supports both English and Italian languages, allowing for broader accessibility.
+The **Exam Management System** is a simple C program designed to help students manage their exam records. It allows users to add new exams, view total credits, calculate the average grade, sort exams, and filter them by grade or date. The system supports both English and Italian languages, allowing for broader accessibility
 
 ## Features
 
